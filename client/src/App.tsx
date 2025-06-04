@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Header from './components/Header/Header';
 import './App.css';
 import BoardsPage from './pages/BoardsPage';
@@ -11,9 +11,12 @@ import CreateIssueDialog, {
 
 function App() {
   const createDialogRef = useRef<CreateIssueDialogRef>(null);
+  const location = useLocation();
 
   const handleCreateOpen = () => {
-    createDialogRef.current?.open();
+    const boardIdMatch = location.pathname.match(/^\/board\/(\d+)$/);
+    const boardId = boardIdMatch ? Number(boardIdMatch[1]) : undefined;
+    createDialogRef.current?.open(boardId);
   };
 
   return (

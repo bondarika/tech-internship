@@ -18,10 +18,17 @@ import { issuesStore } from '../store/issuesStore';
 import { CircularProgress, Typography } from '@mui/material';
 
 export interface CreateIssueDialogRef {
-  open: () => void;
+  open: (boardId?: number) => void;
 }
 
-const CreateIssueDialog = forwardRef<CreateIssueDialogRef>((_, ref) => {
+interface CreateIssueDialogProps {
+  defaultBoardId?: number;
+}
+
+const CreateIssueDialog = forwardRef<
+  CreateIssueDialogRef,
+  CreateIssueDialogProps
+>(({ defaultBoardId }, ref) => {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     title: '',
@@ -34,16 +41,19 @@ const CreateIssueDialog = forwardRef<CreateIssueDialogRef>((_, ref) => {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [forcedBoardId, setForcedBoardId] = useState<number | null>(null);
 
   useImperativeHandle(ref, () => ({
-    open: () => {
+    open: (boardId?: number) => {
       setOpen(true);
+      const selectedBoardId = boardId || defaultBoardId;
+      setForcedBoardId(selectedBoardId || null);
       setForm({
         title: '',
         description: '',
         priority: '',
         assigneeId: '',
-        boardId: '',
+        boardId: selectedBoardId ? String(selectedBoardId) : '',
       });
       setError(null);
       setLoadingUsers(true);
@@ -58,6 +68,7 @@ const CreateIssueDialog = forwardRef<CreateIssueDialogRef>((_, ref) => {
   const handleClose = () => {
     setOpen(false);
     setError(null);
+    setForcedBoardId(null);
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,6 +101,7 @@ const CreateIssueDialog = forwardRef<CreateIssueDialogRef>((_, ref) => {
           assigneeId: '',
           boardId: '',
         });
+        setForcedBoardId(null);
       } else {
         setError(issuesStore.createError || 'Ошибка создания задачи');
       }
@@ -157,6 +169,7 @@ const CreateIssueDialog = forwardRef<CreateIssueDialogRef>((_, ref) => {
               label="Доска"
               onChange={handleSelectChange}
               notched
+              disabled={!!forcedBoardId}
             >
               {boardsStore.boards.map((board) => (
                 <MenuItem key={board.id} value={String(board.id)}>

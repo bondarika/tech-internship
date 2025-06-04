@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { boardsStore } from '../store/boardsStore';
 import { issuesStore } from '../store/issuesStore';
 import Typography from '@mui/material/Typography';
@@ -10,10 +10,6 @@ import IssueCard from '../components/IssueCard';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import IssueDialogContent from '../components/IssueDialogContent';
-import Button from '@mui/material/Button';
-import CreateIssueDialog, {
-  type CreateIssueDialogRef,
-} from '../components/CreateIssueDialog';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import type { Issue } from '../types/Issue';
@@ -33,7 +29,6 @@ const statusLabels: Record<Issue['status'], string> = {
 const BoardPage = observer(() => {
   const { id } = useParams<{ id: string }>();
   const boardId = Number(id);
-  const createDialogRef = useRef<CreateIssueDialogRef>(null);
 
   useEffect(() => {
     if (!boardsStore.boards.length) boardsStore.fetchBoards();
@@ -56,10 +51,6 @@ const BoardPage = observer(() => {
   };
   const handleClose = () => {
     closeDialog();
-  };
-
-  const handleCreateIssue = () => {
-    createDialogRef.current?.open();
   };
 
   const handleDragEnd = (result: DropResult) => {
@@ -111,14 +102,6 @@ const BoardPage = observer(() => {
         <Typography variant="subtitle1" mb={2}>
           Всего задач: {issues.length}
         </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ float: 'right', mb: 3 }}
-          onClick={handleCreateIssue}
-        >
-          Создать задачу
-        </Button>
       </Stack>
 
       <DragDropContext onDragEnd={handleDragEnd}>
@@ -195,7 +178,6 @@ const BoardPage = observer(() => {
           />
         )}
       </Dialog>
-      <CreateIssueDialog ref={createDialogRef} />
     </div>
   );
 });
