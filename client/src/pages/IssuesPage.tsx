@@ -67,7 +67,7 @@ const IssuesPage = observer(({ onCreateIssue }: IssuesPageProps) => {
       <Button
         variant="contained"
         color="primary"
-        sx={{  float: 'right', mb: 3 }}
+        sx={{ float: 'right', mb: 3 }}
         onClick={onCreateIssue}
       >
         Создать задачу
@@ -83,6 +83,7 @@ const IssuesPage = observer(({ onCreateIssue }: IssuesPageProps) => {
             issue={selectedIssue}
             onClose={handleClose}
             editModeDefault={editId === selectedIssue?.id}
+            onGoToBoard={() => handleGoToBoard(selectedIssue)}
           />
         )}
       </Dialog>

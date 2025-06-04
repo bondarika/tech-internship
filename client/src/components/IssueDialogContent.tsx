@@ -13,6 +13,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import CircularProgress from '@mui/material/CircularProgress';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import type { Issue } from '../types/Issue';
 import type { User } from '../types/User';
 import { getUsers } from '../api/users';
@@ -22,6 +23,7 @@ interface IssueDialogContentProps {
   issue: Issue;
   onClose: () => void;
   editModeDefault?: boolean;
+  onGoToBoard?: () => void;
 }
 
 const statusLabels: Record<Issue['status'], string> = {
@@ -39,6 +41,7 @@ const IssueDialogContent: React.FC<IssueDialogContentProps> = ({
   issue,
   onClose,
   editModeDefault = false,
+  onGoToBoard,
 }) => {
   const [editMode, setEditMode] = useState(editModeDefault);
   const [form, setForm] = useState({
@@ -211,7 +214,7 @@ const IssueDialogContent: React.FC<IssueDialogContentProps> = ({
             <Typography variant="body2" color="text.secondary" gutterBottom>
               Проект: {issue.boardName}
             </Typography>
-            <Stack direction="row" spacing={1} mt={2}>
+            <Stack direction="row" spacing={1} mt={2} alignItems="center">
               <Avatar
                 src={issue.assignee.avatarUrl}
                 alt={issue.assignee.fullName}
@@ -221,6 +224,15 @@ const IssueDialogContent: React.FC<IssueDialogContentProps> = ({
                 {issue.assignee.email}
               </Typography>
             </Stack>
+            {onGoToBoard && (
+              <Button
+                onClick={onGoToBoard}
+                startIcon={<OpenInNewIcon />}
+                sx={{ mt: 2 }}
+              >
+                Перейти к доске
+              </Button>
+            )}
           </>
         )}
       </DialogContent>

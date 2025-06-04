@@ -107,7 +107,11 @@ const IssueCard: React.FC<IssueCardProps> = ({
               Проект: {issue.boardName}
             </Typography>
           </Stack>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+          >
             <Avatar
               src={issue.assignee.avatarUrl}
               alt={issue.assignee.fullName}
