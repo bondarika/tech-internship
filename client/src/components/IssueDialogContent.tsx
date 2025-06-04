@@ -21,6 +21,7 @@ import { issuesStore } from '../store/issuesStore';
 interface IssueDialogContentProps {
   issue: Issue;
   onClose: () => void;
+  editModeDefault?: boolean;
 }
 
 const statusLabels: Record<Issue['status'], string> = {
@@ -37,8 +38,9 @@ const priorityLabels: Record<Issue['priority'], string> = {
 const IssueDialogContent: React.FC<IssueDialogContentProps> = ({
   issue,
   onClose,
+  editModeDefault = false,
 }) => {
-  const [editMode, setEditMode] = useState(false);
+  const [editMode, setEditMode] = useState(editModeDefault);
   const [form, setForm] = useState({
     title: issue.title,
     description: issue.description,
@@ -50,6 +52,10 @@ const IssueDialogContent: React.FC<IssueDialogContentProps> = ({
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setEditMode(editModeDefault);
+  }, [editModeDefault, issue.id]);
 
   useEffect(() => {
     if (editMode) {
@@ -89,6 +95,10 @@ const IssueDialogContent: React.FC<IssueDialogContentProps> = ({
   };
 
   const handleCancel = () => {
+    if (editModeDefault) {
+      onClose();
+      return;
+    }
     setEditMode(false);
     setForm({
       title: issue.title,

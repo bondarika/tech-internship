@@ -7,6 +7,7 @@ class IssuesStore {
   loading = false;
   error: string | null = null;
   openId: number | null = null;
+  editModeId: number | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -34,16 +35,27 @@ class IssuesStore {
 
   openDialog = (id: number) => {
     this.openId = id;
+    this.editModeId = null;
+  };
+
+  openEditDialog = (id: number) => {
+    this.openId = id;
+    this.editModeId = id;
   };
 
   closeDialog = () => {
     this.openId = null;
+    this.editModeId = null;
   };
 
   get selectedIssue() {
     return Array.isArray(this.issues)
       ? this.issues.find((issue) => issue.id === this.openId)
       : undefined;
+  }
+
+  get isEditMode() {
+    return this.openId !== null && this.editModeId === this.openId;
   }
 
   editIssue = async (

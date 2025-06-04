@@ -5,10 +5,13 @@ import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
 import type { Issue } from '../types/Issue';
+import EditIcon from '@mui/icons-material/Edit';
+import IconButton from '@mui/material/IconButton';
 
 interface IssueCardProps {
   issue: Issue;
   onClick?: () => void;
+  onEdit?: () => void;
 }
 
 const statusLabels: Record<Issue['status'], string> = {
@@ -36,7 +39,7 @@ const priorityColors: Record<
   High: 'error',
 };
 
-const IssueCard: React.FC<IssueCardProps> = ({ issue, onClick }) => (
+const IssueCard: React.FC<IssueCardProps> = ({ issue, onClick, onEdit }) => (
   <Card
     variant="outlined"
     sx={{ mb: 2, cursor: onClick ? 'pointer' : 'default' }}
@@ -52,11 +55,25 @@ const IssueCard: React.FC<IssueCardProps> = ({ issue, onClick }) => (
         <Typography variant="h6" component="div">
           {issue.title}
         </Typography>
-        <Chip
-          label={statusLabels[issue.status]}
-          color={statusColors[issue.status]}
-          size="small"
-        />
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Chip
+            label={statusLabels[issue.status]}
+            color={statusColors[issue.status]}
+            size="small"
+          />
+          {onEdit && (
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+              aria-label="Редактировать"
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          )}
+        </Stack>
       </Stack>
       <Typography variant="body2" color="text.secondary" mb={1}>
         {issue.description}
