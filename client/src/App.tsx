@@ -8,13 +8,15 @@ import IssuesPage from './pages/IssuesPage';
 function App() {
   return (
     <>
-        <Header />
+      <Header />
+      <div className='container'>
         <Routes>
           <Route path="/boards" element={<BoardsPage />} />
           <Route path="/board/:id" element={<BoardPage />} />
           <Route path="/issues" element={<IssuesPage />} />
           <Route path="*" element={<Navigate to="/boards" replace />} />
         </Routes>
+      </div>
     </>
   );
 }

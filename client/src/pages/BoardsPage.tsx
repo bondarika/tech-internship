@@ -4,10 +4,9 @@ import { boardsStore } from '../store/boardsStore';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Stack from '@mui/material/Stack';
 import { useNavigate } from 'react-router-dom';
+import BoardCard from '../components/BoardCard';
 
 const BoardsPage = observer(() => {
   const navigate = useNavigate();
@@ -27,23 +26,13 @@ const BoardsPage = observer(() => {
       <Stack spacing={2}>
         {!loading &&
           !error &&
+          Array.isArray(boards) &&
           boards.map((board) => (
-            <Card
+            <BoardCard
               key={board.id}
-              variant="outlined"
-              sx={{ cursor: 'pointer' }}
+              board={board}
               onClick={() => navigate(`/board/${board.id}`)}
-            >
-              <CardContent>
-                <Typography variant="h6">{board.name}</Typography>
-                <Typography variant="body2" color="text.secondary" mb={1}>
-                  {board.description}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Задач: {board.taskCount}
-                </Typography>
-              </CardContent>
-            </Card>
+            />
           ))}
       </Stack>
     </div>
