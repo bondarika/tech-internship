@@ -106,9 +106,9 @@ class IssuesStore {
     this.createLoading = true;
     this.createError = null;
     try {
-      const { issueId } = await apiCreateIssue(input);
+      const { id } = await apiCreateIssue(input);
       await this.fetchIssues();
-      return issueId;
+      return id;
     } catch {
       runInAction(() => {
         this.createError = 'Ошибка создания задачи';

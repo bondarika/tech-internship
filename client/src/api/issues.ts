@@ -69,28 +69,19 @@ export const createIssue = async (input: {
   description: string;
   priority: 'Low' | 'Medium' | 'High';
   title: string;
-}): Promise<{ issueId: number }> => {
+}): Promise<{ id: number }> => {
   try {
-    const response = await axiosInstance.post<{ data: { issueId: number } }>(
-      '/tasks/create',
-      input
-    );
-    if (response.data.data && response.data.data.issueId) {
-      return response.data.data;
-    } else {
-      throw new Error('Не удалось создать задачу');
-    }
+    const response = await axiosInstance.post<{
+      data: {
+        id: number;
+      };
+    }>('/tasks/create', input);
+    return response.data.data;
   } catch (error: unknown) {
     if (axios.isAxiosError<ServerError>(error) && error.response) {
-      console.error(
-        'API Error:',
-        error.response.status,
-        error.response.data.message
+      throw new Error(
+        error.response.data.message || 'Не удалось создать задачу'
       );
-    } else if (error instanceof Error) {
-      console.error('Network Error:', error.message);
-    } else {
-      console.error('An unknown error occurred');
     }
     throw error;
   }
