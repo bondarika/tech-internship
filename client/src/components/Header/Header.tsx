@@ -1,7 +1,12 @@
 import { NavLink } from 'react-router-dom';
 import styles from './Header.module.scss';
+import Button from '@mui/material/Button';
 
-const Header = () => {
+interface HeaderProps {
+  onCreateIssue?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onCreateIssue }) => {
   return (
     <header className={styles.header}>
       <nav>
@@ -22,6 +27,14 @@ const Header = () => {
           Все задачи
         </NavLink>
       </nav>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={onCreateIssue}
+        sx={{ ml: 'auto' }}
+      >
+        Создать задачу
+      </Button>
     </header>
   );
 };

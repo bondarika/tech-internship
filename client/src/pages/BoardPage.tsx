@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import { useEffect} from 'react';
+import { useEffect, useRef } from 'react';
 import { boardsStore } from '../store/boardsStore';
 import { issuesStore } from '../store/issuesStore';
 import Typography from '@mui/material/Typography';
@@ -10,10 +10,13 @@ import IssueCard from '../components/IssueCard';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import IssueDialogContent from '../components/IssueDialogContent';
+import Button from '@mui/material/Button';
+import CreateIssueDialog, { type CreateIssueDialogRef } from '../components/CreateIssueDialog';
 
 const BoardPage = observer(() => {
   const { id } = useParams<{ id: string }>();
   const boardId = Number(id);
+  const createDialogRef = useRef<CreateIssueDialogRef>(null);
 
   useEffect(() => {
     if (!boardsStore.boards.length) boardsStore.fetchBoards();
@@ -37,6 +40,10 @@ const BoardPage = observer(() => {
     closeDialog();
   };
 
+  const handleCreateIssue = () => {
+    createDialogRef.current?.open();
+  };
+
   const isEditMode = issuesStore.isEditMode;
 
   if (boardsStore.loading || issuesStore.loading) return <CircularProgress />;
@@ -46,15 +53,26 @@ const BoardPage = observer(() => {
 
   return (
     <div>
-      <Typography variant="h4" mb={2}>
-        {board.name}
-      </Typography>
-      <Typography variant="body1" mb={2}>
-        {board.description}
-      </Typography>
-      <Typography variant="subtitle1" mb={2}>
-        Задачи ({issues.length})
-      </Typography>
+      <Stack>
+        <Typography variant="h4" mb={2}>
+          {board.name}
+        </Typography>
+        <Typography variant="body1" mb={2}>
+          {board.description}
+        </Typography>
+        <Typography variant="subtitle1" mb={2}>
+          Всего задач: {issues.length}
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ float: 'right', mb: 3 }}
+          onClick={handleCreateIssue}
+        >
+          Создать задачу
+        </Button>
+      </Stack>
+
       <Stack spacing={2}>
         {issues.length === 0 && (
           <Typography>В этом проекте нет задач</Typography>
@@ -82,6 +100,7 @@ const BoardPage = observer(() => {
           />
         )}
       </Dialog>
+      <CreateIssueDialog ref={createDialogRef} />
     </div>
   );
 });

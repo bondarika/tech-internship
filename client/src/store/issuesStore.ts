@@ -1,5 +1,9 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { getIssues, updateIssue } from '../api/issues';
+import {
+  getIssues,
+  updateIssue,
+  createIssue as apiCreateIssue,
+} from '../api/issues';
 import type { Issue } from '../types/Issue';
 
 class IssuesStore {
@@ -8,6 +12,8 @@ class IssuesStore {
   error: string | null = null;
   openId: number | null = null;
   editModeId: number | null = null;
+  createLoading = false;
+  createError: string | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -86,6 +92,31 @@ class IssuesStore {
     } finally {
       runInAction(() => {
         this.loading = false;
+      });
+    }
+  };
+
+  createIssue = async (input: {
+    assigneeId: number;
+    boardId: number;
+    description: string;
+    priority: 'Low' | 'Medium' | 'High';
+    title: string;
+  }): Promise<number | null> => {
+    this.createLoading = true;
+    this.createError = null;
+    try {
+      const { issueId } = await apiCreateIssue(input);
+      await this.fetchIssues();
+      return issueId;
+    } catch {
+      runInAction(() => {
+        this.createError = 'Ошибка создания задачи';
+      });
+      return null;
+    } finally {
+      runInAction(() => {
+        this.createLoading = false;
       });
     }
   };

@@ -8,10 +8,17 @@ import Alert from '@mui/material/Alert';
 import { issuesStore } from '../store/issuesStore';
 import IssueDialogContent from '../components/IssueDialogContent';
 import { useNavigate } from 'react-router-dom';
+import Button from '@mui/material/Button';
+import { boardsStore } from '../store/boardsStore';
 
-const IssuesPage = observer(() => {
+interface IssuesPageProps {
+  onCreateIssue?: () => void;
+}
+
+const IssuesPage = observer(({ onCreateIssue }: IssuesPageProps) => {
   useEffect(() => {
     issuesStore.fetchIssues();
+    boardsStore.fetchBoards();
   }, []);
 
   const { issues, loading, error, openDialog, closeDialog, selectedIssue } =
@@ -31,7 +38,7 @@ const IssuesPage = observer(() => {
     setEditId(null);
   };
 
-  const handleGoToBoard = (issue: (typeof issues)[0]) => {
+  const handleGoToBoard = (issue: (typeof issuesStore.issues)[0]) => {
     navigate(`/board/${issue.boardId}`);
     setTimeout(() => {
       issuesStore.openDialog(issue.id);
@@ -52,11 +59,19 @@ const IssuesPage = observer(() => {
           <IssueCard
             key={issue.id}
             issue={issue}
-            onClick={() => openDialog(issue.id)}
+            onClick={() => issuesStore.openDialog(issue.id)}
             onEdit={() => handleEdit(issue.id)}
             onGoToBoard={() => handleGoToBoard(issue)}
           />
         ))}
+      <Button
+        variant="contained"
+        color="primary"
+        sx={{  float: 'right', mb: 3 }}
+        onClick={onCreateIssue}
+      >
+        Создать задачу
+      </Button>
       <Dialog
         open={!!selectedIssue}
         onClose={handleClose}
@@ -67,7 +82,7 @@ const IssuesPage = observer(() => {
           <IssueDialogContent
             issue={selectedIssue}
             onClose={handleClose}
-            editModeDefault={editId === selectedIssue.id}
+            editModeDefault={editId === selectedIssue?.id}
           />
         )}
       </Dialog>
