@@ -26,7 +26,7 @@ const CreateIssueDialog = forwardRef<CreateIssueDialogRef>((_, ref) => {
   const [form, setForm] = useState({
     title: '',
     description: '',
-    priority: 'Medium',
+    priority: '',
     assigneeId: '',
     boardId: '',
   });
@@ -41,7 +41,7 @@ const CreateIssueDialog = forwardRef<CreateIssueDialogRef>((_, ref) => {
       setForm({
         title: '',
         description: '',
-        priority: 'Medium',
+        priority: '',
         assigneeId: '',
         boardId: '',
       });
@@ -86,7 +86,7 @@ const CreateIssueDialog = forwardRef<CreateIssueDialogRef>((_, ref) => {
         setForm({
           title: '',
           description: '',
-          priority: 'Medium',
+          priority: '',
           assigneeId: '',
           boardId: '',
         });
