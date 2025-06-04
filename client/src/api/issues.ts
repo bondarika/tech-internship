@@ -38,12 +38,12 @@ export const updateIssue = async (
   }
 ): Promise<{ message: string }> => {
   try {
-    const response = await axiosInstance.put<{ message: string }>(
+    const response = await axiosInstance.put<{ data: { message: string } }>(
       `/tasks/update/${taskId}`,
       input
     );
-    if (response.data && response.data.message) {
-      return response.data;
+    if (response.data.data && response.data.data.message) {
+      return response.data.data;
     } else {
       throw new Error('Не удалось обновить задачу');
     }
