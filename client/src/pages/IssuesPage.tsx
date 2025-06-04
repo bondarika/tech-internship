@@ -7,6 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import { issuesStore } from '../store/issuesStore';
 import IssueDialogContent from '../components/IssueDialogContent';
+import { useNavigate } from 'react-router-dom';
 
 const IssuesPage = observer(() => {
   useEffect(() => {
@@ -18,6 +19,8 @@ const IssuesPage = observer(() => {
 
   const [editId, setEditId] = useState<number | null>(null);
 
+  const navigate = useNavigate();
+
   const handleEdit = (id: number) => {
     openDialog(id);
     setEditId(id);
@@ -26,6 +29,13 @@ const IssuesPage = observer(() => {
   const handleClose = () => {
     closeDialog();
     setEditId(null);
+  };
+
+  const handleGoToBoard = (issue: (typeof issues)[0]) => {
+    navigate(`/board/${issue.boardId}`);
+    setTimeout(() => {
+      issuesStore.openDialog(issue.id);
+    }, 0);
   };
 
   return (
@@ -44,6 +54,7 @@ const IssuesPage = observer(() => {
             issue={issue}
             onClick={() => openDialog(issue.id)}
             onEdit={() => handleEdit(issue.id)}
+            onGoToBoard={() => handleGoToBoard(issue)}
           />
         ))}
       <Dialog

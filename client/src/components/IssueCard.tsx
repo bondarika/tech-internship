@@ -7,11 +7,13 @@ import Avatar from '@mui/material/Avatar';
 import type { Issue } from '../types/Issue';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 interface IssueCardProps {
   issue: Issue;
   onClick?: () => void;
   onEdit?: () => void;
+  onGoToBoard?: () => void;
 }
 
 const statusLabels: Record<Issue['status'], string> = {
@@ -39,7 +41,12 @@ const priorityColors: Record<
   High: 'error',
 };
 
-const IssueCard: React.FC<IssueCardProps> = ({ issue, onClick, onEdit }) => (
+const IssueCard: React.FC<IssueCardProps> = ({
+  issue,
+  onClick,
+  onEdit,
+  onGoToBoard,
+}) => (
   <Card
     variant="outlined"
     sx={{ mb: 2, cursor: onClick ? 'pointer' : 'default' }}
@@ -71,6 +78,18 @@ const IssueCard: React.FC<IssueCardProps> = ({ issue, onClick, onEdit }) => (
               aria-label="Редактировать"
             >
               <EditIcon fontSize="small" />
+            </IconButton>
+          )}
+          {onGoToBoard && (
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onGoToBoard();
+              }}
+              aria-label="Открыть на доске"
+            >
+              <OpenInNewIcon fontSize="small" />
             </IconButton>
           )}
         </Stack>
