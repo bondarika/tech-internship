@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import Header from './components/Header';
+import Header from './components/Header/Header';
 import './App.css';
 import BoardsPage from './pages/BoardsPage';
 import BoardPage from './pages/BoardPage';
