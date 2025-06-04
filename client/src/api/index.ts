@@ -1,1 +1,2 @@
-﻿export * from './boards';
+﻿export * from './issues';
+export * from './boards';

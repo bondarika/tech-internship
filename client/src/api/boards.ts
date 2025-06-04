@@ -5,9 +5,9 @@ import type { ServerError } from '../types/ServerError';
 
 export const getBoards = async (): Promise<Board[]> => {
   try {
-    const response = await axiosInstance.get<Board[]>('/boards');
-    if (response.data) {
-      return response.data;
+    const response = await axiosInstance.get<{data: Board[]}>('/boards');
+    if (response.data.data) {
+      return response.data.data;
     } else {
       throw new Error('Не удалось получить список досок');
     }
