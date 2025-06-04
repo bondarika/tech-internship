@@ -21,6 +21,10 @@ import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import IconButton from '@mui/material/IconButton';
+import { getUserIssues } from '../api/users';
+import type { UserTasks } from '../types/UserTasks';
+import Autocomplete from '@mui/material/Autocomplete';
+import type { Assignee } from '../types/Asignee';
 
 interface IssuesPageProps {
   onCreateIssue?: () => void;
@@ -46,6 +50,12 @@ const IssuesPage = observer(({ onCreateIssue }: IssuesPageProps) => {
   const [boardFilter, setBoardFilter] = useState<number | ''>('');
   const [titleSearch, setTitleSearch] = useState('');
   const [assigneeSearch, setAssigneeSearch] = useState('');
+  const [userTasks, setUserTasks] = useState<UserTasks | null>(null);
+  const [loadingUserTasks, setLoadingUserTasks] = useState(false);
+  const [userTasksError, setUserTasksError] = useState<string | null>(null);
+  const [selectedAssignee, setSelectedAssignee] = useState<Assignee | null>(
+    null
+  );
 
   const navigate = useNavigate();
 
@@ -66,31 +76,77 @@ const IssuesPage = observer(({ onCreateIssue }: IssuesPageProps) => {
     }, 0);
   };
 
-  const filteredIssues = useMemo(() => {
-    return issues.filter((issue) => {
-      const matchesStatus = !statusFilter || issue.status === statusFilter;
-      const matchesBoard = !boardFilter || issue.boardId === boardFilter;
-      const matchesTitle =
-        !titleSearch ||
-        issue.title.toLowerCase().includes(titleSearch.toLowerCase());
-      const matchesAssignee =
-        !assigneeSearch ||
-        issue.assignee.fullName
-          .toLowerCase()
-          .includes(assigneeSearch.toLowerCase()) ||
-        issue.assignee.email
-          .toLowerCase()
-          .includes(assigneeSearch.toLowerCase());
-
-      return matchesStatus && matchesBoard && matchesTitle && matchesAssignee;
+  const uniqueAssignees = useMemo(() => {
+    const assigneeMap = new Map<number, Assignee>();
+    issues.forEach((issue) => {
+      if (!assigneeMap.has(issue.assignee.id)) {
+        assigneeMap.set(issue.assignee.id, issue.assignee);
+      }
     });
-  }, [issues, statusFilter, boardFilter, titleSearch, assigneeSearch]);
+    return Array.from(assigneeMap.values());
+  }, [issues]);
+
+  const handleAssigneeSearch = async (assignee: Assignee | null) => {
+    setSelectedAssignee(assignee);
+    setAssigneeSearch(
+      assignee ? `${assignee.fullName} (${assignee.email})` : ''
+    );
+
+    if (!assignee) {
+      setUserTasks(null);
+      setUserTasksError(null);
+      return;
+    }
+
+    setLoadingUserTasks(true);
+    setUserTasksError(null);
+    try {
+      const tasks = await getUserIssues(assignee.id);
+      setUserTasks(tasks);
+    } catch (error) {
+      setUserTasksError('Ошибка при поиске задач пользователя');
+      console.error('Error fetching user tasks:', error);
+    } finally {
+      setLoadingUserTasks(false);
+    }
+  };
+
+  const filteredIssues = useMemo(() => {
+    let filtered = issues;
+    if (statusFilter) {
+      filtered = filtered.filter((issue) => issue.status === statusFilter);
+    }
+    if (boardFilter) {
+      filtered = filtered.filter((issue) => issue.boardId === boardFilter);
+    }
+    if (titleSearch) {
+      filtered = filtered.filter((issue) =>
+        issue.title.toLowerCase().includes(titleSearch.toLowerCase())
+      );
+    }
+    if (assigneeSearch && userTasks) {
+      const userTaskIds = new Set(userTasks.map((task) => task.id));
+      filtered = filtered.filter((issue) => userTaskIds.has(issue.id));
+    }
+
+    return filtered;
+  }, [
+    issues,
+    statusFilter,
+    boardFilter,
+    titleSearch,
+    assigneeSearch,
+    userTasks,
+  ]);
 
   const handleClearFilters = () => {
     setStatusFilter('');
     setBoardFilter('');
     setTitleSearch('');
     setAssigneeSearch('');
+    setSelectedAssignee(null);
+    setUserTasks(null);
+    setUserTasksError(null);
   };
 
   return (
@@ -162,30 +218,46 @@ const IssuesPage = observer(({ onCreateIssue }: IssuesPageProps) => {
           sx={{ minWidth: 200 }}
         />
 
-        <TextField
+        <Autocomplete
           size="small"
-          label="Поиск по исполнителю"
-          value={assigneeSearch}
-          onChange={(e) => setAssigneeSearch(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: assigneeSearch && (
-              <InputAdornment position="end">
-                <IconButton
-                  size="small"
-                  onClick={() => setAssigneeSearch('')}
-                  edge="end"
-                >
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
+          options={uniqueAssignees}
+          getOptionLabel={(option) => `${option.fullName} (${option.email})`}
+          value={selectedAssignee}
+          onChange={(_, newValue) => handleAssigneeSearch(newValue)}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Поиск по исполнителю"
+              error={!!userTasksError}
+              helperText={userTasksError}
+              InputProps={{
+                ...params.InputProps,
+                startAdornment: (
+                  <>
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                    {params.InputProps.startAdornment}
+                  </>
+                ),
+              }}
+            />
+          )}
+          sx={{ minWidth: 300 }}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          renderOption={(props, option) => {
+            const { key, ...otherProps } = props;
+            return (
+              <li key={key} {...otherProps}>
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <Typography variant="body1">{option.fullName}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {option.email}
+                  </Typography>
+                </Box>
+              </li>
+            );
           }}
-          sx={{ minWidth: 200 }}
         />
 
         <Button
@@ -199,6 +271,7 @@ const IssuesPage = observer(({ onCreateIssue }: IssuesPageProps) => {
 
       {loading && <CircularProgress />}
       {error && <Alert severity="error">{error}</Alert>}
+      {loadingUserTasks && <CircularProgress size={20} sx={{ ml: 2 }} />}
       {!loading &&
         !error &&
         Array.isArray(filteredIssues) &&
