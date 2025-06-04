@@ -16,7 +16,7 @@ const BoardPage = observer(() => {
   useEffect(() => {
     if (!boardsStore.boards.length) boardsStore.fetchBoards();
     if (!issuesStore.issues.length) issuesStore.fetchIssues();
-  }, []);
+  }, [boardId]);
 
   const board = boardsStore.boards.find((b) => b.id === boardId);
   const issues = issuesStore.issues.filter(

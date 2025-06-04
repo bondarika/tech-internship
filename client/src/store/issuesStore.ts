@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { getIssues } from '../api/issues';
+import { getIssues, updateIssue } from '../api/issues';
 import type { Issue } from '../types/Issue';
 
 class IssuesStore {
@@ -45,6 +45,38 @@ class IssuesStore {
       ? this.issues.find((issue) => issue.id === this.openId)
       : undefined;
   }
+
+  editIssue = async (
+    taskId: number,
+    input: {
+      assigneeId: number;
+      description: string;
+      priority: 'Low' | 'Medium' | 'High';
+      status: 'Backlog' | 'InProgress' | 'Done';
+      title: string;
+    }
+  ) => {
+    this.loading = true;
+    this.error = null;
+    try {
+      await updateIssue(taskId, input);
+      runInAction(() => {
+        const idx = this.issues.findIndex((issue) => issue.id === taskId);
+        if (idx !== -1) {
+          this.issues[idx] = { ...this.issues[idx], ...input };
+        }
+        this.error = null;
+      });
+    } catch {
+      runInAction(() => {
+        this.error = 'Ошибка обновления задачи';
+      });
+    } finally {
+      runInAction(() => {
+        this.loading = false;
+      });
+    }
+  };
 }
 
 export const issuesStore = new IssuesStore();
