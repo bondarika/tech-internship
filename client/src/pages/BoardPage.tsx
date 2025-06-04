@@ -11,7 +11,18 @@ import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
 import IssueDialogContent from '../components/IssueDialogContent';
 import Button from '@mui/material/Button';
-import CreateIssueDialog, { type CreateIssueDialogRef } from '../components/CreateIssueDialog';
+import CreateIssueDialog, {
+  type CreateIssueDialogRef,
+} from '../components/CreateIssueDialog';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import type { Issue } from '../types/Issue';
+
+const statusLabels: Record<Issue['status'], string> = {
+  Backlog: 'Бэклог',
+  InProgress: 'В работе',
+  Done: 'Готово',
+};
 
 const BoardPage = observer(() => {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +39,8 @@ const BoardPage = observer(() => {
     (issue) => issue.boardId === boardId
   );
 
-  const { openDialog, openEditDialog, closeDialog, selectedIssue } = issuesStore;
+  const { openDialog, openEditDialog, closeDialog, selectedIssue } =
+    issuesStore;
 
   const handleOpen = (id: number) => {
     openDialog(id);
@@ -50,6 +62,12 @@ const BoardPage = observer(() => {
   if (boardsStore.error)
     return <Alert severity="error">{boardsStore.error}</Alert>;
   if (!board) return <Alert severity="warning">Проект не найден</Alert>;
+
+  const issuesByStatus = {
+    Backlog: issues.filter((issue) => issue.status === 'Backlog'),
+    InProgress: issues.filter((issue) => issue.status === 'InProgress'),
+    Done: issues.filter((issue) => issue.status === 'Done'),
+  };
 
   return (
     <div>
@@ -73,19 +91,39 @@ const BoardPage = observer(() => {
         </Button>
       </Stack>
 
-      <Stack spacing={2}>
-        {issues.length === 0 && (
-          <Typography>В этом проекте нет задач</Typography>
-        )}
-        {issues.map((issue) => (
-          <IssueCard
-            key={issue.id}
-            issue={issue}
-            onClick={() => handleOpen(issue.id)}
-            onEdit={() => handleEdit(issue.id)}
-          />
+      <Box sx={{ display: 'flex', gap: 2 }}>
+        {(['Backlog', 'InProgress', 'Done'] as const).map((status) => (
+          <Box key={status} sx={{ flex: 1 }}>
+            <Paper
+              elevation={2}
+              sx={{
+                p: 2,
+                height: '100%',
+                minHeight: 'calc(100vh - 300px)',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <Typography variant="h6" gutterBottom>
+                {statusLabels[status]} ({issuesByStatus[status].length})
+              </Typography>
+              <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
+                <Stack spacing={2}>
+                  {issuesByStatus[status].map((issue) => (
+                    <IssueCard
+                      key={issue.id}
+                      issue={issue}
+                      onClick={() => handleOpen(issue.id)}
+                      onEdit={() => handleEdit(issue.id)}
+                    />
+                  ))}
+                </Stack>
+              </Box>
+            </Paper>
+          </Box>
         ))}
-      </Stack>
+      </Box>
+
       <Dialog
         open={!!selectedIssue}
         onClose={handleClose}
