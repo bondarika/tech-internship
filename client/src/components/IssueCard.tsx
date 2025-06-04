@@ -61,14 +61,11 @@ const IssueCard: React.FC<IssueCardProps> = ({
     >
       <CardContent sx={{ position: 'relative', p: 2, pb: 6 }}>
         <Stack spacing={1}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography variant="h6" component="div">
+          <Stack direction="row" alignItems="center">
+            <Typography variant="h6" component="div" textAlign="left">
               {issue.title}
             </Typography>
+            <Box sx={{ minWidth: '2rem', flexGrow: 1 }} />
             <Stack direction="row" spacing={1} alignItems="center">
               <Chip
                 label={statusLabels[issue.status]}
@@ -107,11 +104,7 @@ const IssueCard: React.FC<IssueCardProps> = ({
               Проект: {issue.boardName}
             </Typography>
           </Stack>
-          <Stack
-            direction="row"
-            spacing={1}
-            alignItems="center"
-          >
+          <Stack direction="row" spacing={1} alignItems="center">
             <Avatar
               src={issue.assignee.avatarUrl}
               alt={issue.assignee.fullName}
